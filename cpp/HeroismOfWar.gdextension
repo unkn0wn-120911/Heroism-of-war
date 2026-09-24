@@ -1,0 +1,8 @@
+[configuration]
+entry_symbol = "heroism_of_war_library_init"
+compatibility_minimum = 4.1
+compatibility_maximum = 4.2
+
+[libraries]
+linux.debug.x86_64 = "res://cpp/build/libheroism_of_war.so"
+linux.release.x86_64 = "res://cpp/build/libheroism_of_war.so"

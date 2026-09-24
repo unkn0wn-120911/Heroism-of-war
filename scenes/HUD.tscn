@@ -1,0 +1,77 @@
+[gd_scene load_steps=2 format=3 uid="uid://btn12r2g2s3vj"]
+
+[ext_resource type="Script" path="res://scripts/HUD.gd" id="1_3nwhu"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_3nwhu")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Panel" type="Panel" parent="Margin"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBox" type="HBoxContainer" parent="Margin/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Stats" type="GridContainer" parent="Margin/Panel/HBox"]
+layout_mode = 2
+columns = 6
+
+[node name="HealthLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Health"
+
+[node name="HealthValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "100"
+
+[node name="ArmorLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Armor"
+
+[node name="ArmorValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "35"
+
+[node name="AmmoLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Ammo"
+
+[node name="AmmoValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "30"
+
+[node name="KillLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Kills"
+
+[node name="KillValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "0"
+
+[node name="ZoneLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Zone"
+
+[node name="ZoneValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "70m"
+
+[node name="TimerLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Time"
+
+[node name="TimerValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "00:00"
+
+[node name="WeaponLabel" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "Weapon"
+
+[node name="WeaponValue" type="Label" parent="Margin/Panel/HBox/Stats"]
+text = "AR-12"

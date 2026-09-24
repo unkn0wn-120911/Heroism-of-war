@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://c2qqn14vjhl5m"]
+
+[ext_resource type="Script" path="res://scripts/Projectile.gd" id="1_0j8y1"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_1"]
+radius = 0.08
+height = 0.16
+radial_segments = 12
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.96, 0.79, 0.12, 1)
+emission_enabled = true
+emission = Color(1, 0.8, 0, 1)
+emission_energy = 0.9
+
+[node name="Projectile" type="Node3D"]
+script = ExtResource("1_0j8y1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_1")
+material_override = SubResource("StandardMaterial3D_1")
