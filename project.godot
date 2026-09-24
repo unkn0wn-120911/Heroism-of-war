@@ -4,7 +4,8 @@
 config_version=5
 
 [application]
-config/name="Heroism of War"
+config/name="HeroismOfWar"
+config/icon="res://icon.svg"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.2")
 boot_splash/show_image=false
@@ -29,6 +30,8 @@ input/boost={"deadzone":0.2,"events":[Object(InputEventKey,"resource_local_to_sc
 [rendering]
 renderer/rendering_method="forward_plus"
 anti_aliasing/quality/msaa_3d=2
+textures/vram_compression/import_etc2_astc=true
+textures/vram_compression/import_etc2_astc_buffer=0
 
 [physics]
 common/physics_ticks_per_second=120
