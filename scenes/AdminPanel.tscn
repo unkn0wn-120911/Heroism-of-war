@@ -1,0 +1,193 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/AdminPanel.gd" id="1_hx5r4"]
+
+[node name="AdminPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hx5r4")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Game Content Admin"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+
+[node name="InputGrid" type="GridContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+columns = 5
+
+[node name="MapNameLabel" type="Label" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Map"
+
+[node name="MapNameEdit" type="LineEdit" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+placeholder_text = "Map name"
+
+[node name="AddMapButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Add Map"
+
+[node name="CharacterNameLabel" type="Label" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Character"
+
+[node name="CharacterNameEdit" type="LineEdit" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+placeholder_text = "Character name"
+
+[node name="AddCharacterButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Add Character"
+
+[node name="EventNameLabel" type="Label" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Event"
+
+[node name="EventNameEdit" type="LineEdit" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+placeholder_text = "Event name"
+
+[node name="AddEventButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Add Event"
+
+[node name="AssetPathLabel" type="Label" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Asset"
+
+[node name="AssetPathEdit" type="LineEdit" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+placeholder_text = "Asset path"
+
+[node name="ImportAssetButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Import Asset"
+
+[node name="SaveButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Save Manifest"
+
+[node name="BackButton" type="Button" parent="Panel/Margin/VBox/InputGrid"]
+layout_mode = 2
+text = "Back"
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Admin ready"
+autowrap_mode = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="Panel" parent="Panel/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(220, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MapListLabel" type="Label" parent="Panel/Margin/VBox/BottomRow/LeftPanel"]
+layout_mode = 0
+offset_left = 10
+offset_top = 10
+offset_right = 200
+offset_bottom = 30
+text = "Maps"
+
+[node name="MapList" type="ItemList" parent="Panel/Margin/VBox/BottomRow/LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10
+offset_top = 34
+offset_right = -10
+offset_bottom = -10
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MidPanel" type="Panel" parent="Panel/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(220, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharacterListLabel" type="Label" parent="Panel/Margin/VBox/BottomRow/MidPanel"]
+layout_mode = 0
+offset_left = 10
+offset_top = 10
+offset_right = 200
+offset_bottom = 30
+text = "Characters"
+
+[node name="CharacterList" type="ItemList" parent="Panel/Margin/VBox/BottomRow/MidPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10
+offset_top = 34
+offset_right = -10
+offset_bottom = -10
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RightPanel" type="Panel" parent="Panel/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(220, 200)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EventListLabel" type="Label" parent="Panel/Margin/VBox/BottomRow/RightPanel"]
+layout_mode = 0
+offset_left = 10
+offset_top = 10
+offset_right = 200
+offset_bottom = 30
+text = "Events"
+
+[node name="EventList" type="ItemList" parent="Panel/Margin/VBox/BottomRow/RightPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10
+offset_top = 34
+offset_right = -10
+offset_bottom = -10
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FileDialog" type="FileDialog" parent="."]
+visible = false
+mode_overrides_title = false
+title = "Open a File"
+initial_position = 2
+size = Vector2i(480, 360)
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.png, *.jpg, *.jpeg, *.glb, *.obj, *.json")

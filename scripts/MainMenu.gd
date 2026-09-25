@@ -5,6 +5,7 @@ extends Control
 @onready var start_button: Button = $Center/Panel/Margin/VBox/StartButton
 @onready var quick_button: Button = $Center/Panel/Margin/VBox/QuickMatchButton
 @onready var loadout_button: Button = $Center/Panel/Margin/VBox/LoadoutButton
+@onready var admin_button: Button = $Center/Panel/Margin/VBox/AdminButton
 @onready var quit_button: Button = $Center/Panel/Margin/VBox/QuitButton
 
 var selected_mode: String = "Squad"
@@ -34,6 +35,7 @@ func _ready() -> void:
     start_button.pressed.connect(_on_start_match_pressed)
     quick_button.pressed.connect(_on_quick_match_pressed)
     loadout_button.pressed.connect(_on_loadout_pressed)
+    admin_button.pressed.connect(_on_admin_pressed)
     quit_button.pressed.connect(_on_quit_pressed)
     player_name_edit.text_submitted.connect(_on_player_name_submitted)
 
@@ -140,6 +142,10 @@ func _on_loadout_pressed() -> void:
         ]
     lobby_status.text = "[b]Loadout ready:[/b] %s | [b]Vault:[/b] %s | [b]Mode:[/b] %s" % [gun_catalog[0], vault_items[1], selected_mode]
     get_tree().change_scene_to_file("res://scenes/GunLoadout.tscn")
+
+func _on_admin_pressed() -> void:
+    save_account_profile()
+    get_tree().change_scene_to_file("res://scenes/AdminPanel.tscn")
 
 func _on_quit_pressed() -> void:
     get_tree().quit()
