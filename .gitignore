@@ -29,3 +29,32 @@ game28.dta
 
 # Log files
 warnings.log
+
+# Godot generated files
+.import/
+.export_presets/
+.godot/
+
+# Native / build output
+cpp/build/
+build/
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.apk
+
+# Android local signing artifacts
+android/*.keystore
+android/*.jks
+android/*.p12
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# General
+.DS_Store
+Thumbs.db
+__pycache__/
+*.log

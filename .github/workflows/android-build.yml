@@ -1,0 +1,98 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.7.2
+      GODOT_SHORT: 4.7.2
+      ANDROID_HOME: /opt/android-sdk
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK command tools
+        shell: bash
+        run: |
+          set -e
+          mkdir -p /opt/android-sdk
+          cd /tmp
+          curl -L -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          rm -rf /opt/android-sdk/cmdline-tools
+          mkdir -p /opt/android-sdk/cmdline-tools/latest
+          unzip -q -o cmdline-tools.zip -d /opt/android-sdk
+          cp -a /opt/android-sdk/cmdline-tools/. /opt/android-sdk/cmdline-tools/latest/
+          rm -rf /opt/android-sdk/cmdline-tools
+          mkdir -p /opt/android-sdk/cmdline-tools
+          cp -a /opt/android-sdk/cmdline-tools/latest/. /opt/android-sdk/cmdline-tools/
+          rm -rf /opt/android-sdk/cmdline-tools/latest
+          export PATH="$ANDROID_HOME/cmdline-tools/bin:$PATH"
+          yes | /opt/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
+          /opt/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264"
+
+      - name: Install Godot 4 editor
+        shell: bash
+        run: |
+          set -e
+          mkdir -p /opt/godot
+          cd /tmp
+          curl -L -o godot-editor.zip https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q -o godot-editor.zip -d /opt/godot
+          chmod +x /opt/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64
+
+      - name: Install Godot export templates
+        shell: bash
+        run: |
+          set -e
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cd /tmp
+          curl -L -o export_templates.tpz https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q -o export_templates.tpz -d "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          ln -sf "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/templates/android_debug.apk" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_debug.apk"
+          ln -sf "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/templates/android_release.apk" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_release.apk"
+          ln -sf "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/templates/android_source.zip" "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip"
+
+      - name: Generate Android debug keystore
+        shell: bash
+        run: |
+          set -e
+          mkdir -p android
+          keytool -genkey -v \
+            -keystore android/debug.keystore \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=Heroism of War, OU=GameDev, O=Heroism of War, L=Remote, S=NA, C=US"
+
+      - name: Export Android APK
+        shell: bash
+        run: |
+          set -e
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/bin:$PATH"
+          /opt/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path . --export-debug "Android" build/HeroismOfWar-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeroismOfWar-Android-Debug
+          path: build/HeroismOfWar-debug.apk
+          if-no-files-found: error
