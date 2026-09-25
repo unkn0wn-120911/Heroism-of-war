@@ -139,6 +139,7 @@ func _on_loadout_pressed() -> void:
             4
         ]
     lobby_status.text = "[b]Loadout ready:[/b] %s | [b]Vault:[/b] %s | [b]Mode:[/b] %s" % [gun_catalog[0], vault_items[1], selected_mode]
+    get_tree().change_scene_to_file("res://scenes/GunLoadout.tscn")
 
 func _on_quit_pressed() -> void:
     get_tree().quit()
