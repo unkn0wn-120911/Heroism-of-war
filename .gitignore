@@ -58,3 +58,4 @@ android/*.p12
 Thumbs.db
 __pycache__/
 *.log
+node_modules/

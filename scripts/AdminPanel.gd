@@ -8,6 +8,8 @@ extends Control
 @onready var character_list: ItemList = $Panel/Margin/VBox/BottomRow/MidPanel/CharacterList
 @onready var event_list: ItemList = $Panel/Margin/VBox/BottomRow/RightPanel/EventList
 @onready var status_label: Label = $Panel/Margin/VBox/StatusLabel
+@onready var backend_url_edit: LineEdit = $Panel/Margin/VBox/ServerRow/BackendUrlEdit
+@onready var publish_button: Button = $Panel/Margin/VBox/ServerRow/PublishButton
 @onready var add_map_button: Button = $Panel/Margin/VBox/InputGrid/AddMapButton
 @onready var add_character_button: Button = $Panel/Margin/VBox/InputGrid/AddCharacterButton
 @onready var add_event_button: Button = $Panel/Margin/VBox/InputGrid/AddEventButton
@@ -15,6 +17,8 @@ extends Control
 @onready var save_button: Button = $Panel/Margin/VBox/InputGrid/SaveButton
 @onready var back_button: Button = $Panel/Margin/VBox/InputGrid/BackButton
 @onready var file_dialog: FileDialog = $FileDialog
+
+var http_request: HTTPRequest
 
 var content_manifest: Dictionary = {
     "maps": [],
@@ -24,10 +28,16 @@ var content_manifest: Dictionary = {
 }
 
 func _ready() -> void:
+    http_request = HTTPRequest.new()
+    add_child(http_request)
+    http_request.request_completed.connect(_on_publish_completed)
+
+    backend_url_edit.text = "https://example.com/api/admin/content/publish"
     add_map_button.pressed.connect(_on_add_map_pressed)
     add_character_button.pressed.connect(_on_add_character_pressed)
     add_event_button.pressed.connect(_on_add_event_pressed)
     import_asset_button.pressed.connect(_on_import_asset_pressed)
+    publish_button.pressed.connect(_on_publish_pressed)
     save_button.pressed.connect(_on_save_pressed)
     back_button.pressed.connect(_on_back_pressed)
     file_dialog.file_selected.connect(_on_file_selected)
@@ -112,6 +122,34 @@ func _on_save_pressed() -> void:
 
     file.store_string(JSON.stringify(content_manifest, "\t"))
     status_label.text = "Content manifest saved to %s" % path
+
+func _on_publish_pressed() -> void:
+    var url = backend_url_edit.text.strip_edges()
+    if url.is_empty():
+        status_label.text = "Set backend URL before publishing."
+        return
+
+    status_label.text = "Publishing content to backend..."
+    var headers = ["Content-Type: application/json"]
+    var payload = JSON.stringify({
+        "version": Time.get_datetime_string_from_system(false),
+        "content": content_manifest,
+        "updated_by": "admin_android"
+    })
+    var err = http_request.request(url, headers, HTTPClient.METHOD_POST, payload)
+    if err != OK:
+        status_label.text = "Publish request failed: %s" % err
+
+func _on_publish_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+    if result != HTTPRequest.RESULT_SUCCESS:
+        status_label.text = "Backend upload failed. Check server URL and connection."
+        return
+
+    var text = body.get_string_from_utf8()
+    if response_code >= 200 and response_code < 300:
+        status_label.text = "Content uploaded to database successfully."
+    else:
+        status_label.text = "Upload failed: %s" % text
 
 func _on_back_pressed() -> void:
     get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
