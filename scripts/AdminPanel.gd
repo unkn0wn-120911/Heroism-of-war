@@ -8,6 +8,9 @@ extends Control
 @onready var character_list: ItemList = $Panel/Margin/VBox/BottomRow/MidPanel/CharacterList
 @onready var event_list: ItemList = $Panel/Margin/VBox/BottomRow/RightPanel/EventList
 @onready var status_label: Label = $Panel/Margin/VBox/StatusLabel
+@onready var admin_username_edit: LineEdit = $Panel/Margin/VBox/AuthRow/UsernameEdit
+@onready var admin_password_edit: LineEdit = $Panel/Margin/VBox/AuthRow/PasswordEdit
+@onready var login_button: Button = $Panel/Margin/VBox/AuthRow/LoginButton
 @onready var backend_url_edit: LineEdit = $Panel/Margin/VBox/ServerRow/BackendUrlEdit
 @onready var publish_button: Button = $Panel/Margin/VBox/ServerRow/PublishButton
 @onready var add_map_button: Button = $Panel/Margin/VBox/InputGrid/AddMapButton
@@ -19,6 +22,9 @@ extends Control
 @onready var file_dialog: FileDialog = $FileDialog
 
 var http_request: HTTPRequest
+var admin_token: String = ""
+var pending_request_type: String = "publish"
+const SESSION_PATH := "user://admin_session.json"
 
 var content_manifest: Dictionary = {
     "maps": [],
@@ -30,9 +36,11 @@ var content_manifest: Dictionary = {
 func _ready() -> void:
     http_request = HTTPRequest.new()
     add_child(http_request)
-    http_request.request_completed.connect(_on_publish_completed)
+    http_request.request_completed.connect(_on_request_completed)
 
-    backend_url_edit.text = "https://example.com/api/admin/content/publish"
+    admin_password_edit.secret = true
+    backend_url_edit.text = "https://example.com"
+    login_button.pressed.connect(_on_login_pressed)
     add_map_button.pressed.connect(_on_add_map_pressed)
     add_character_button.pressed.connect(_on_add_character_pressed)
     add_event_button.pressed.connect(_on_add_event_pressed)
@@ -42,9 +50,13 @@ func _ready() -> void:
     back_button.pressed.connect(_on_back_pressed)
     file_dialog.file_selected.connect(_on_file_selected)
 
+    load_session()
     load_manifest()
     refresh_lists()
-    status_label.text = "Admin ready. Add new maps, characters, events, or imported visuals."
+    if admin_token.is_empty():
+        status_label.text = "Admin login required before publishing content."
+    else:
+        status_label.text = "Admin session restored. Content can be published."
 
 func _on_add_map_pressed() -> void:
     var map_name = map_name_edit.text.strip_edges()
@@ -123,29 +135,63 @@ func _on_save_pressed() -> void:
     file.store_string(JSON.stringify(content_manifest, "\t"))
     status_label.text = "Content manifest saved to %s" % path
 
+func _on_login_pressed() -> void:
+    var base_url = _get_base_url()
+    if base_url.is_empty():
+        status_label.text = "Set the backend base URL before login."
+        return
+
+    pending_request_type = "login"
+    status_label.text = "Signing in to admin panel..."
+    var payload = JSON.stringify({
+        "username": admin_username_edit.text.strip_edges(),
+        "password": admin_password_edit.text
+    })
+    var err = http_request.request(base_url + "/api/admin/login", ["Content-Type: application/json"], HTTPClient.METHOD_POST, payload)
+    if err != OK:
+        status_label.text = "Login request failed: %s" % err
+
 func _on_publish_pressed() -> void:
-    var url = backend_url_edit.text.strip_edges()
+    if admin_token.is_empty():
+        status_label.text = "Login required before publishing."
+        return
+
+    var url = _get_base_url() + "/api/admin/content/publish"
     if url.is_empty():
         status_label.text = "Set backend URL before publishing."
         return
 
+    pending_request_type = "publish"
     status_label.text = "Publishing content to backend..."
-    var headers = ["Content-Type: application/json"]
+    var headers = ["Content-Type: application/json", "Authorization: Bearer %s" % admin_token]
     var payload = JSON.stringify({
         "version": Time.get_datetime_string_from_system(false),
         "content": content_manifest,
-        "updated_by": "admin_android"
+        "updated_by": admin_username_edit.text.strip_edges()
     })
     var err = http_request.request(url, headers, HTTPClient.METHOD_POST, payload)
     if err != OK:
         status_label.text = "Publish request failed: %s" % err
 
-func _on_publish_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
     if result != HTTPRequest.RESULT_SUCCESS:
-        status_label.text = "Backend upload failed. Check server URL and connection."
+        status_label.text = "Backend request failed. Check server URL and connection."
         return
 
     var text = body.get_string_from_utf8()
+    if text.is_empty():
+        text = "OK"
+
+    var parsed = JSON.parse_string(text)
+    if pending_request_type == "login":
+        if response_code >= 200 and response_code < 300 and typeof(parsed) == TYPE_DICTIONARY and parsed.get("token", "") != "":
+            admin_token = String(parsed.get("token", ""))
+            save_session()
+            status_label.text = "Admin login successful. Session token saved."
+            return
+        status_label.text = "Login failed: %s" % text
+        return
+
     if response_code >= 200 and response_code < 300:
         status_label.text = "Content uploaded to database successfully."
     else:
@@ -153,6 +199,32 @@ func _on_publish_completed(result: int, response_code: int, _headers: PackedStri
 
 func _on_back_pressed() -> void:
     get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+func _get_base_url() -> String:
+    var text = backend_url_edit.text.strip_edges().rstrip("/")
+    if text.contains("/api/admin/content/publish"):
+        return text.replace("/api/admin/content/publish", "")
+    if text.contains("/api/admin/login"):
+        return text.replace("/api/admin/login", "")
+    if text.contains("/api/content/latest"):
+        return text.replace("/api/content/latest", "")
+    return text
+
+func save_session() -> void:
+    var file = FileAccess.open(SESSION_PATH, FileAccess.WRITE)
+    if file == null:
+        return
+    file.store_string(JSON.stringify({"token": admin_token}))
+
+func load_session() -> void:
+    if not FileAccess.file_exists(SESSION_PATH):
+        return
+    var file = FileAccess.open(SESSION_PATH, FileAccess.READ)
+    if file == null:
+        return
+    var parsed = JSON.parse_string(file.get_as_text())
+    if typeof(parsed) == TYPE_DICTIONARY:
+        admin_token = String(parsed.get("token", ""))
 
 func load_manifest() -> void:
     var path = "user://content_manifest.json"

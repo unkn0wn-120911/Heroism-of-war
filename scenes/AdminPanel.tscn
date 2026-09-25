@@ -98,6 +98,33 @@ text = "Save Manifest"
 layout_mode = 2
 text = "Back"
 
+[node name="AuthRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="UsernameLabel" type="Label" parent="Panel/Margin/VBox/AuthRow"]
+layout_mode = 2
+text = "Username"
+
+[node name="UsernameEdit" type="LineEdit" parent="Panel/Margin/VBox/AuthRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+placeholder_text = "admin"
+
+[node name="PasswordLabel" type="Label" parent="Panel/Margin/VBox/AuthRow"]
+layout_mode = 2
+text = "Password"
+
+[node name="PasswordEdit" type="LineEdit" parent="Panel/Margin/VBox/AuthRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+secret = true
+placeholder_text = "password"
+
+[node name="LoginButton" type="Button" parent="Panel/Margin/VBox/AuthRow"]
+layout_mode = 2
+text = "Login"
+
 [node name="ServerRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
 alignment = 1
@@ -109,7 +136,7 @@ text = "Backend URL"
 [node name="BackendUrlEdit" type="LineEdit" parent="Panel/Margin/VBox/ServerRow"]
 custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
-text = "https://example.com/api/admin/content/publish"
+text = "https://example.com"
 
 [node name="PublishButton" type="Button" parent="Panel/Margin/VBox/ServerRow"]
 layout_mode = 2

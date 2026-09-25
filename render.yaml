@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: heroism-of-war-backend
+    env: node
+    plan: free
+    buildCommand: "cd server && npm install"
+    startCommand: "cd server && npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVER_PORT
+        value: 10000
+      - key: PORT
+        value: 10000
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_SESSION_TTL_MINUTES
+        value: "480"
