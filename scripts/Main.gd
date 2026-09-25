@@ -1,24 +1,31 @@
 extends Node3D
 
-@export var enemy_limit: int = 12
+@export var enemy_limit: int = 8
+@export var wave_size_step: int = 2
 @onready var player: CharacterBody3D = $Player
 var enemy_scene = preload("res://scenes/Enemy.tscn")
+var vehicle_scene = preload("res://scenes/Vehicle.tscn")
 var hud: CanvasLayer
 var kill_count: int = 0
 var match_time: float = 0.0
 var zone_radius: float = 70.0
+var current_wave: int = 1
+var active_vehicle: Node3D = null
 
 func _ready() -> void:
     setup_input_map()
     randomize()
+
     if not has_node("HUD"):
         var hud_scene = load("res://scenes/HUD.tscn")
         hud = hud_scene.instantiate()
         add_child(hud)
     else:
         hud = $HUD
+
     spawn_wave()
-    print("Heroism of War prototype started")
+    spawn_vehicle()
+    print("Heroism of War battle arena started")
     update_hud()
 
 func setup_input_map() -> void:
@@ -44,12 +51,14 @@ func _process(delta: float) -> void:
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
     match_time += delta
-    zone_radius = max(12.0, zone_radius - delta * 0.35)
+    zone_radius = max(12.0, zone_radius - delta * 0.2)
     apply_zone_damage(delta)
+    check_wave_progress()
     update_hud()
 
 func spawn_wave() -> void:
-    for i in range(enemy_limit):
+    var enemy_count = enemy_limit + (current_wave - 1) * wave_size_step
+    for i in range(enemy_count):
         var enemy = enemy_scene.instantiate()
         var x = randf_range(-30.0, 30.0)
         var z = randf_range(-30.0, 30.0)
@@ -57,6 +66,15 @@ func spawn_wave() -> void:
         if enemy.position.distance_to(player.position) < 12.0:
             enemy.position += Vector3(14.0, 0.0, 10.0)
         add_child(enemy)
+
+func spawn_vehicle() -> void:
+    if active_vehicle != null:
+        return
+
+    var vehicle = vehicle_scene.instantiate()
+    vehicle.position = Vector3(randf_range(-20.0, 20.0), 0.6, randf_range(-20.0, 20.0))
+    add_child(vehicle)
+    active_vehicle = vehicle
 
 func apply_zone_damage(delta: float) -> void:
     if player == null:
@@ -68,8 +86,28 @@ func register_kill() -> void:
     kill_count += 1
     update_hud()
 
+func check_wave_progress() -> void:
+    var required_kills = current_wave * 4
+    if kill_count >= required_kills:
+        current_wave += 1
+        spawn_wave()
+        spawn_vehicle()
+
+func _on_player_died() -> void:
+    if player == null:
+        return
+
+    print("Player eliminated. Respawning in the safe zone.")
+    player.health = 100.0
+    player.armor = 35.0
+    player.ammo = 30
+    player.position = Vector3(0.0, 1.2, 0.0)
+    player.velocity = Vector3.ZERO
+    player.rotation = Vector3.ZERO
+    update_hud()
+
 func update_hud() -> void:
-    if hud != null and hud.has_method("update_match_info"):
+    if hud != null and hud.has_method("update_match_info") and player != null:
         hud.update_match_info(
             player.health,
             player.armor,

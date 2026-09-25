@@ -15,6 +15,8 @@ extends CharacterBody3D
 
 var projectile_scene = preload("res://scenes/Projectile.tscn")
 var fire_timer: float = 0.0
+var boost_timer: float = 0.0
+var boost_cooldown: float = 0.0
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -30,6 +32,16 @@ func _input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
     fire_timer = max(0.0, fire_timer - delta)
+    boost_timer = max(0.0, boost_timer - delta)
+    boost_cooldown = max(0.0, boost_cooldown - delta)
+
+    var current_speed = move_speed
+    if boost_timer > 0.0:
+        current_speed += 8.0
+    elif Input.is_action_pressed("boost") and boost_cooldown <= 0.0 and is_near_vehicle():
+        boost_timer = 2.5
+        boost_cooldown = 5.0
+        current_speed += 8.0
 
     var direction = Vector3.ZERO
     var input_forward = Input.get_action_strength("move_back") - Input.get_action_strength("move_forward")
@@ -38,8 +50,8 @@ func _physics_process(delta: float) -> void:
     direction = ((transform.basis.x * input_right) + (transform.basis.z * input_forward)).normalized()
 
     if direction.length() > 0:
-        velocity.x = lerp(velocity.x, direction.x * move_speed, acceleration * delta)
-        velocity.z = lerp(velocity.z, direction.z * move_speed, acceleration * delta)
+        velocity.x = lerp(velocity.x, direction.x * current_speed, acceleration * delta)
+        velocity.z = lerp(velocity.z, direction.z * current_speed, acceleration * delta)
     else:
         velocity.x = lerp(velocity.x, 0.0, acceleration * delta)
         velocity.z = lerp(velocity.z, 0.0, acceleration * delta)
@@ -56,6 +68,12 @@ func _physics_process(delta: float) -> void:
 
     if health <= 0.0:
         get_parent()._on_player_died()
+
+func is_near_vehicle() -> bool:
+    for vehicle in get_tree().get_nodes_in_group("vehicle"):
+        if global_position.distance_to(vehicle.global_position) < 2.8:
+            return true
+    return false
 
 func fire() -> void:
     if ammo <= 0:
