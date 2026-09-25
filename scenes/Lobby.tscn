@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Lobby.gd" id="1_pqw3a"]
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pqw3a")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.09, 0.14, 1)
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(700, 440)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -220.0
+offset_right = 350.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Battle Lobby"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 32
+
+[node name="LobbyStatus" type="RichTextLabel" parent="Panel/Margin/VBox"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+text = "[b]Squad ready:[/b] 4/4  |  [b]Match type:[/b] Battle Royale"
+
+[node name="PlayerList" type="ItemList" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ReadyButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Ready Up"
+
+[node name="DeployButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Deploy"
