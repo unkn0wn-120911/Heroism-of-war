@@ -14,6 +14,7 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || hashPassword(ADMIN_PASSWORD);
 const ADMIN_SESSION_TTL_MS = Number(process.env.ADMIN_SESSION_TTL_MINUTES || 480) * 60 * 1000;
+const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || 'https://example.com/heroism_of_war/HeroismOfWar.apk';
 const adminTokens = new Map();
 
 app.use(cors());
@@ -175,6 +176,33 @@ app.get('/api/content/latest', async (_req, res) => {
   } catch (error) {
     console.error('Failed to fetch latest content:', error);
     return res.status(500).json({ ok: false, error: 'Failed to fetch latest content' });
+  }
+});
+
+app.get('/api/update/latest', async (_req, res) => {
+  const version = fallbackContent.version || '1.0.0';
+
+  try {
+    const database = await connectMongo();
+    let latestVersion = version;
+    let latestUrl = APK_DOWNLOAD_URL;
+
+    if (database) {
+      const latest = await database.collection('content_manifest').findOne({}, { sort: { updatedAt: -1 } });
+      if (latest && latest.version) {
+        latestVersion = latest.version;
+      }
+    }
+
+    return res.json({
+      version: latestVersion,
+      apk_url: latestUrl,
+      update_available: false,
+      message: 'Live APK update manifest endpoint.'
+    });
+  } catch (error) {
+    console.error('Failed to fetch update manifest:', error);
+    return res.status(500).json({ ok: false, error: 'Failed to fetch update manifest' });
   }
 });
 

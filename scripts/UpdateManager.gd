@@ -1,8 +1,8 @@
 extends Node
 
 @export var current_version: String = "1.0.0"
-@export var manifest_url: String = "https://example.com/heroism_of_war/manifest.json"
-@export var apk_download_url: String = "https://example.com/heroism_of_war/HeroismOfWar.apk"
+@export var manifest_url: String = "https://heroism-of-war.vercel.app/api/update/latest"
+@export var apk_download_url: String = "https://heroism-of-war.vercel.app"
 
 var http_request: HTTPRequest
 var latest_version: String = ""
