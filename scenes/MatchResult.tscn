@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/MatchResult.gd" id="1_1q0d1"]
+
+[node name="MatchResult" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_1q0d1")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 80
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Victory Royale"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SummaryLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "You survived the final circle and won the match."
+autowrap_mode = 3
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Kills: 0\nTime: 00:00\nWeapon: AR-12"
+autowrap_mode = 3
+
+[node name="ReplayButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Play Again"
+
+[node name="LobbyButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Back to Lobby"

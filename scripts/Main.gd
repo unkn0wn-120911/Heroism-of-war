@@ -75,9 +75,8 @@ func _process(delta: float) -> void:
         match_stage = "Combat Zone"
 
     if kill_count >= 8:
-        match_finished = true
-        result_text = "Victory - Winner!"
-        match_stage = "Match Complete"
+        finish_match(true)
+        return
 
     if loot_timer >= loot_spawn_interval:
         loot_timer = 0.0
@@ -125,14 +124,22 @@ func _on_player_died() -> void:
     if player == null:
         return
 
-    print("Player eliminated. Respawning in the safe zone.")
-    player.health = 100.0
-    player.armor = 35.0
-    player.ammo = 30
-    player.position = Vector3(0.0, 1.2, 0.0)
-    player.velocity = Vector3.ZERO
-    player.rotation = Vector3.ZERO
-    update_hud()
+    if not match_finished:
+        finish_match(false)
+    return
+
+func finish_match(victory: bool) -> void:
+    if match_finished:
+        return
+
+    match_finished = true
+    result_text = "Victory - Winner!" if victory else "Defeat - Eliminated"
+    match_stage = "Match Complete"
+    MatchState.set_result(victory, kill_count, match_time, player.weapon_name if player != null else "AR-12")
+    call_deferred("_go_to_result_screen")
+
+func _go_to_result_screen() -> void:
+    get_tree().change_scene_to_file("res://scenes/MatchResult.tscn")
 
 func random_loot_position() -> Vector3:
     return Vector3(randf_range(-24.0, 24.0), 0.5, randf_range(-24.0, 24.0))
