@@ -9,6 +9,8 @@ extends CharacterBody3D
 @export var armor: float = 35.0
 @export var ammo: int = 30
 @export var weapon_name: String = "AR-12"
+@export var weapon_damage: float = 25.0
+@export var fire_rate: float = 0.12
 
 @onready var camera: Camera3D = $Camera3D
 @onready var muzzle: Marker3D = $Camera3D/Muzzle
@@ -17,6 +19,12 @@ var projectile_scene = preload("res://scenes/Projectile.tscn")
 var fire_timer: float = 0.0
 var boost_timer: float = 0.0
 var boost_cooldown: float = 0.0
+var weapon_catalog = {
+    "AR-12": 25.0,
+    "M4": 30.0,
+    "Scout": 44.0,
+    "Shotgun": 18.0
+}
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -69,6 +77,22 @@ func _physics_process(delta: float) -> void:
     if health <= 0.0:
         get_parent()._on_player_died()
 
+func collect_loot(type_name: String, amount: int) -> void:
+    match type_name:
+        "ammo":
+            ammo += amount
+        "medkit":
+            health = min(100.0, health + float(amount))
+        "armor":
+            armor = min(100.0, armor + float(amount))
+        "weapon":
+            var options = ["AR-12", "M4", "Scout", "Shotgun"]
+            weapon_name = options[randi() % options.size()]
+            weapon_damage = weapon_catalog.get(weapon_name, 25.0)
+            fire_rate = max(0.06, 0.12 - (weapon_name == "Scout") * 0.02)
+
+    get_parent().update_hud()
+
 func is_near_vehicle() -> bool:
     for vehicle in get_tree().get_nodes_in_group("vehicle"):
         if global_position.distance_to(vehicle.global_position) < 2.8:
@@ -81,12 +105,12 @@ func fire() -> void:
         return
 
     ammo -= 1
-    fire_timer = 0.12
+    fire_timer = fire_rate
 
     var projectile = projectile_scene.instantiate()
     projectile.global_transform.origin = muzzle.global_position
     projectile.direction = -camera.global_transform.basis.z.normalized()
-    projectile.damage = 25.0
+    projectile.damage = weapon_damage
     get_parent().add_child(projectile)
 
 func take_damage(amount: float) -> void:
