@@ -5,7 +5,7 @@ extends Control
 @onready var progress_bar: ProgressBar = $Center/Panel/VBox/ProgressBar
 
 var elapsed: float = 0.0
-var content_url: String = "https://example.com/api/content/latest"
+var content_url: String = "https://heroism-of-war.vercel.app/api/content/latest"
 var http_request: HTTPRequest
 var loading_config: Dictionary = {
     "title": "Heroism of War",

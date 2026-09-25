@@ -39,7 +39,7 @@ func _ready() -> void:
     http_request.request_completed.connect(_on_request_completed)
 
     admin_password_edit.secret = true
-    backend_url_edit.text = "https://example.com"
+    backend_url_edit.text = "https://heroism-of-war.vercel.app"
     login_button.pressed.connect(_on_login_pressed)
     add_map_button.pressed.connect(_on_add_map_pressed)
     add_character_button.pressed.connect(_on_add_character_pressed)
