@@ -108,15 +108,17 @@ jobs:
 
           mkdir -p android
 
-          keytool -genkey -v \
-            -keystore android/debug.keystore \
-            -alias androiddebugkey \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass android \
-            -keypass android \
-            -dname "CN=Heroism of War, OU=GameDev, O=Heroism of War, L=Remote, S=NA, C=US"
+          if [ ! -f android/debug.keystore ]; then
+            keytool -genkey -v \
+              -keystore android/debug.keystore \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Heroism of War, OU=GameDev, O=Heroism of War, L=Remote, S=NA, C=US"
+          fi
 
       - name: Export Android APK
         shell: bash
