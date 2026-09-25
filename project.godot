@@ -4,9 +4,9 @@
 config_version=5
 
 [application]
-config/name="HeroismOfWar"
+config/name="Heroism of War"
 config/icon="res://icon.svg"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.2")
 boot_splash/show_image=false
 boot_splash/bg_color=Color(0.06, 0.06, 0.08, 1)
