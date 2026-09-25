@@ -15,6 +15,9 @@ var current_wave: int = 1
 var active_vehicle: Node3D = null
 var loot_timer: float = 0.0
 var result_label: Label
+var match_stage: String = "Combat Zone"
+var result_text: String = ""
+var match_finished: bool = false
 
 func _ready() -> void:
     setup_input_map()
@@ -56,11 +59,26 @@ func _process(delta: float) -> void:
     if Input.is_action_just_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
+    if match_finished:
+        update_hud()
+        return
+
     match_time += delta
     loot_timer += delta
     zone_radius = max(12.0, zone_radius - delta * 0.2)
     apply_zone_damage(delta)
     check_wave_progress()
+
+    if zone_radius <= 18.0:
+        match_stage = "Final Circle"
+    else:
+        match_stage = "Combat Zone"
+
+    if kill_count >= 8:
+        match_finished = true
+        result_text = "Victory - Winner!"
+        match_stage = "Match Complete"
+
     if loot_timer >= loot_spawn_interval:
         loot_timer = 0.0
         spawn_loot_pack(random_loot_position(), random_loot_type(), randi_range(10, 30))
@@ -139,7 +157,9 @@ func update_hud() -> void:
             kill_count,
             int(zone_radius),
             match_time,
-            player.weapon_name
+            player.weapon_name,
+            match_stage,
+            result_text
         )
 
 func add_score(amount: int) -> void:

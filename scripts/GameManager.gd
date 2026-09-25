@@ -58,7 +58,9 @@ func update_hud() -> void:
             kill_count,
             int(zone_radius),
             match_time,
-            player.weapon_name
+            player.weapon_name,
+            "Combat Zone",
+            ""
         )
 
 func _on_player_died() -> void:
