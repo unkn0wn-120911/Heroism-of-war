@@ -8,10 +8,12 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
-const port = Number(process.env.SERVER_PORT || 9000);
+const port = Number(process.env.SERVER_PORT || process.env.PORT || 9000);
 const mongoUri = process.env.MONGODB_URI || '';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || hashPassword(ADMIN_PASSWORD);
+const ADMIN_SESSION_TTL_MS = Number(process.env.ADMIN_SESSION_TTL_MINUTES || 480) * 60 * 1000;
 const adminTokens = new Map();
 
 app.use(cors());
@@ -38,6 +40,26 @@ function createDefaultContent() {
   };
 }
 
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hashed = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return `${salt}:${hashed}`;
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash) {
+    return password === ADMIN_PASSWORD;
+  }
+
+  const [salt, expectedHash] = String(storedHash).split(':');
+  if (!salt || !expectedHash) {
+    return false;
+  }
+
+  const derivedHash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(expectedHash, 'hex'), Buffer.from(derivedHash, 'hex'));
+}
+
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
@@ -51,7 +73,17 @@ function getAdminToken(req) {
   return auth;
 }
 
+function purgeExpiredTokens() {
+  const now = Date.now();
+  for (const [token, expiresAt] of adminTokens.entries()) {
+    if (Number(expiresAt) <= now) {
+      adminTokens.delete(token);
+    }
+  }
+}
+
 function requireAdmin(req, res, next) {
+  purgeExpiredTokens();
   const token = getAdminToken(req);
   if (!token || !adminTokens.has(token)) {
     return res.status(401).json({ ok: false, error: 'Unauthorized' });
@@ -102,10 +134,14 @@ app.post('/api/admin/login', (req, res) => {
     return res.status(401).json({ ok: false, error: 'Invalid admin credentials' });
   }
 
-  const token = generateToken();
-  adminTokens.set(token, Date.now() + 1000 * 60 * 60 * 8);
+  if (!verifyPassword(password, ADMIN_PASSWORD_HASH)) {
+    return res.status(401).json({ ok: false, error: 'Invalid admin credentials' });
+  }
 
-  return res.json({ ok: true, token, expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 8).toISOString() });
+  const token = generateToken();
+  adminTokens.set(token, Date.now() + ADMIN_SESSION_TTL_MS);
+
+  return res.json({ ok: true, token, expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS).toISOString() });
 });
 
 app.post('/api/admin/logout', requireAdmin, (req, res) => {
@@ -175,6 +211,10 @@ app.post('/api/admin/content/publish', requireAdmin, async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Heroism of War backend listening on http://localhost:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Heroism of War backend listening on http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
